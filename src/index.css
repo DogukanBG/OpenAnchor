@@ -1,0 +1,69 @@
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #0d1117;
+  color: #e2e8f0;
+  font-family: 'IBM Plex Sans', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  overflow: hidden;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #2a3140; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #3d4a5c; }
+
+/* Drag region for macOS traffic lights */
+.drag-region { -webkit-app-region: drag; }
+.no-drag { -webkit-app-region: no-drag; }
+
+/* Glow effects */
+.glow-green { box-shadow: 0 0 20px rgba(61,214,140,0.15); }
+.glow-red { box-shadow: 0 0 20px rgba(249,112,102,0.15); }
+
+/* Glass card */
+.glass {
+  background: rgba(22, 27, 34, 0.8);
+  backdrop-filter: blur(12px);
+  border: 1px solid #2a3140;
+}
+
+/* Chart tooltip */
+.recharts-tooltip-wrapper .recharts-default-tooltip {
+  background: #161b22 !important;
+  border: 1px solid #2a3140 !important;
+  border-radius: 8px !important;
+  color: #e2e8f0 !important;
+}
+
+/* Selection */
+::selection { background: rgba(61,214,140,0.25); }
+
+/* Input focus ring */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: #3dd68c !important;
+  box-shadow: 0 0 0 2px rgba(61,214,140,0.15);
+}
+
+/* Smooth transitions */
+button, a { transition: all 0.15s ease; }
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #1c2128 25%, #262d36 50%, #1c2128 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
