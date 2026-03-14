@@ -17,7 +17,7 @@ Get a full financial overview at a glance. The dashboard shows your income, expe
 Every transaction in one place. Filter by time range, category, or type — search across all entries instantly. Add, edit, or delete transactions manually, or let the AI importer handle it. Each row shows the date, description, category icon, and amount at a glance.
 
 ### AI Assistant
-![AI Assistant](assets/aiassistant.png)
+![AI Assistant](assets/ai_assistant.png)
 Your personal finance analyst — running entirely on your machine. Powered by Ollama, the AI assistant reads your transaction history and answers questions, spots spending patterns, and gives tailored recommendations. No data ever leaves your device.
 
 ---
