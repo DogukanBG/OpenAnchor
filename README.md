@@ -17,7 +17,7 @@ Get a full financial overview at a glance. The dashboard shows your real account
 Every transaction in one place. Filter by time range, category, or type — search across all entries instantly. Add, edit, or delete transactions manually, or let the AI importer handle it. Each row shows the date, description, category icon, amount, and which page of the statement it came from.
 
 ### AI Assistant
-![AI Assistant](assets/ai_assistant.png)
+![AI Assistant](assets/aiassistant.png)
 Your personal finance analyst — running entirely on your machine. Choose how much data to give the model: 7 days up to a full year. The assistant loads that window of transactions and gives accurate, number-grounded advice. No data ever leaves your device.
 
 ---
@@ -36,23 +36,31 @@ Your personal finance analyst — running entirely on your machine. Choose how m
 - 🤖 **Page-by-page AI extraction** — each page processed individually, no text gets cut off
 - 🇩🇪 **German & English aware** — understands two-column layouts (Lasten/Gunsten), trailing minus format (`329,00-`), and German number formatting (`1.234,56`)
 - 🏦 **Smart balance detection** — extracts closing balance from the statement; only updates your stored balance if the statement is more recent than the last one imported
+- 🏷️ **Hybrid auto-categorization** — 200+ keyword patterns match instantly (REWE → Groceries, Deutsche Bahn → Transport); unmatched transactions go to a single AI batch call
 - ✅ **Review before importing** — edit dates, amounts, types and assign categories before anything is saved
 
 ### Transactions
 - ✏️ **Full manual management** — add, edit, delete any transaction
+- ☑️ **Bulk delete** — select multiple transactions with checkboxes and delete in one click
 - 🔍 **Search & filter** — by date range, category, type, or free text
 - 🏷️ **20 built-in categories** + unlimited custom ones, each with a colour and emoji icon
+- 🏪 **Merchant summary** — dedicated tab showing every merchant grouped by total spend, average, and count, with a full transaction history per merchant
 
 ### AI Assistant
 - 🧠 **Configurable data window** — choose 7 days, 2 weeks, 1 month, 3 months, 6 months, or 1 year as the basis for advice
 - 💬 **Streaming chat** — responses appear token by token, just like a chat app
+- 🛑 **Stop generation** — cancel a response mid-stream with one click
+- ✏️ **Edit past messages** — click any sent message to edit and re-run from that point
+- 💾 **Persistent chat history** — all conversations are saved locally; rename or delete any chat from the sidebar
 - 📊 **Grounded in your data** — the model receives your actual transaction history, category breakdown, and income/expense summary
 - 🔒 **Fully local** — powered by Ollama, no API calls, no internet required
 
-### Appearance
+### Appearance & Personalisation
 - 🎨 **Theme switcher** — Light and Dark base themes
 - 🌈 **Accent colours** — 7 presets (Emerald, Blue, Purple, Orange, Red, Cyan, Pink) plus a custom hex picker with live preview
 - 💾 **Persisted** — theme is saved to the local database and restored on next launch
+- 👤 **User profile** — set your name for a personalised random greeting on the dashboard and assistant
+- 🧠 **Personal memory** — write notes about your financial situation (goals, constraints, income) that get injected into every AI prompt
 
 ---
 
@@ -76,20 +84,22 @@ Start Ollama and pull at least one model:
 ```bash
 ollama serve
 
-# In a new terminal — pick models based on your hardware:
-ollama pull llama3.2        # 3B — fast, good for extraction
-ollama pull llama3.1:8b     # 8B — great assistant model
-ollama pull qwen2.5:3b      # 3B — very fast, multilingual (good for German statements)
-ollama pull mistral:7b      # 7B — solid all-rounder
+# In a new terminal — recommended models:
+ollama pull gemma3:4b       # 4B — fast, excellent quality, great default choice
+ollama pull gemma3:12b      # 12B — better reasoning, good for the AI assistant
+ollama pull qwen3.5:2b      # 2B — very fast, strong multilingual 
+ollama pull qwen3.5:9b      # 9B — better quality
 ```
 
 **Model recommendations by task and hardware:**
 
 | Task | Low-end (8GB RAM) | Mid-range (16GB) | High-end (32GB+) |
 |------|-------------------|-----------------|-----------------|
-| Statement extraction | `qwen2.5:3b` | `llama3.2:3b` | `llama3.1:8b` |
-| AI assistant | `qwen2.5:3b` | `llama3.1:8b` | `llama3.3:70b` |
-| Health report | `qwen2.5:3b` | `llama3.1:8b` | `llama3.3:70b` |
+| Statement extraction | `qwen3.5:2b` | `gemma3:4b` | `gemma3:12b` |
+| AI assistant | `gemma3:4b` | `gemma3:12b` | `gemma3:27b` |
+| Health report | `gemma3:4b` | `gemma3:12b` | `gemma3:27b` |
+
+> `gemma3:4b` is the recommended starting point — it handles both extraction and the assistant well on most hardware. Use `qwen3.5:2b` if you have a German bank statement and want the fastest possible extraction.
 
 You can use a smaller model for extraction and a larger one for the assistant — they are configured independently in Settings.
 

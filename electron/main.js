@@ -6,6 +6,9 @@ const https = require('https')
 
 const isDev = process.env.NODE_ENV === 'development'
 
+// Track active streaming request so we can abort it
+let activeStreamReq = null
+
 // ─── Database ────────────────────────────────────────────────────────────────
 const Database = require('./database')
 let db
@@ -59,7 +62,8 @@ ipcMain.handle('transactions:getAll', (_, filters) => db.getTransactions(filters
 ipcMain.handle('transactions:add', (_, tx) => db.addTransaction(tx))
 ipcMain.handle('transactions:update', (_, id, tx) => db.updateTransaction(id, tx))
 ipcMain.handle('transactions:delete', (_, id) => db.deleteTransaction(id))
-ipcMain.handle('transactions:bulkAdd', (_, txs) => db.bulkAddTransactions(txs))
+ipcMain.handle('transactions:bulkAdd',    (_, txs) => db.bulkAddTransactions(txs))
+ipcMain.handle('transactions:bulkDelete', (_, ids) => db.bulkDeleteTransactions(ids))
 
 // ─── IPC: Categories ─────────────────────────────────────────────────────────
 ipcMain.handle('categories:getAll', () => db.getCategories())
@@ -141,6 +145,18 @@ ipcMain.handle('file:extractText', async (_, filePath) => {
 
   throw new Error(`Unsupported file type: ${ext}`)
 })
+
+// ─── IPC: Merchants ──────────────────────────────────────────────────────────
+ipcMain.handle('merchants:getAll',    (_, filters)             => db.getMerchants(filters))
+ipcMain.handle('merchants:getHistory',(_, description, filters)=> db.getMerchantHistory(description, filters))
+
+// ─── IPC: Chats ──────────────────────────────────────────────────────────────
+ipcMain.handle('chats:getAll',      ()                     => db.getChats())
+ipcMain.handle('chats:create',      (_, title, sl, sd)     => db.createChat(title, sl, sd))
+ipcMain.handle('chats:updateTitle', (_, id, title)         => db.updateChatTitle(id, title))
+ipcMain.handle('chats:delete',      (_, id)                => db.deleteChat(id))
+ipcMain.handle('chats:getMessages', (_, chatId)            => db.getChatMessages(chatId))
+ipcMain.handle('chats:addMessage',  (_, chatId, role, msg) => db.addChatMessage(chatId, role, msg))
 
 // ─── IPC: Balance ────────────────────────────────────────────────────────────
 ipcMain.handle('balance:get', () => db.getBalance())

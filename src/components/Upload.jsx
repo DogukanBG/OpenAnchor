@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useApp } from '../App'
+import { autoCategorize } from '../utils/categorize'
 
 // ── Prompts ───────────────────────────────────────────────────────────────────
 

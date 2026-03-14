@@ -65,6 +65,15 @@ Write the report now. Highlight: 1) overall financial health, 2) any unusual or 
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
+const GREETINGS = [
+  (name) => `Hi ${name} 👋`,
+  (name) => `Hey ${name} 👋`,
+  (name) => `Welcome back, ${name} 👋`,
+  (name) => `Good to see you, ${name} 👋`,
+  (name) => `Hello, ${name} 👋`,
+  (name) => `What's up, ${name} 👋`,
+]
+
 export default function Dashboard() {
   const { currency, categories, settings, ollamaOk, setPage } = useApp()
   const [selectedRange, setSelectedRange]   = useState(2)
@@ -74,6 +83,11 @@ export default function Dashboard() {
   const [breakdown, setBreakdown]  = useState([])
   const [loading, setLoading]      = useState(true)
   const [accountBalance, setAccountBalance] = useState(null)
+  const userName = settings.user_name || ''
+  const greetingRef = React.useRef(userName ? GREETINGS[Math.floor(Math.random() * GREETINGS.length)](userName) : '')
+  React.useEffect(() => {
+    if (userName) greetingRef.current = GREETINGS[Math.floor(Math.random() * GREETINGS.length)](userName)
+  }, [userName])
 
   // Health report state
   const [report, setReport]           = useState('')
@@ -183,10 +197,12 @@ export default function Dashboard() {
     <div className="h-full overflow-y-auto p-6 space-y-5 animate-fade-in">
 
       {/* ── Header ── */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl font-bold text-text-bright">Overview</h1>
-          <p className="text-muted text-sm mt-0.5">
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0 overflow-hidden">
+          <h1 className="font-display text-2xl font-bold text-text-bright truncate">
+            {userName ? greetingRef.current : 'Overview'}
+          </h1>
+          <p className="text-muted text-sm mt-0.5 truncate">
             {selectedCategory ? `Filtered: ${selectedCategory}` : 'All categories'}
           </p>
         </div>

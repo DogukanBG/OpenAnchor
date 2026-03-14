@@ -39,7 +39,9 @@ export default function Settings() {
     ollama_url: 'http://127.0.0.1:11434',
     theme: 'dark',
     accent_color: 'green',
-    accent_custom: '#3dd68c'
+    accent_custom: '#3dd68c',
+    user_name: '',
+    user_memory: ''
   })
 
   useEffect(() => {
@@ -52,7 +54,9 @@ export default function Settings() {
         ollama_url: settings.ollama_url || 'http://127.0.0.1:11434',
         theme: settings.theme || 'dark',
         accent_color: settings.accent_color || 'green',
-        accent_custom: settings.accent_custom || '#3dd68c'
+        accent_custom: settings.accent_custom || '#3dd68c',
+        user_name: settings.user_name || '',
+        user_memory: settings.user_memory || ''
       }))
     }
   }, [settings])
@@ -398,6 +402,34 @@ export default function Settings() {
               ))}
             </div>
           </details>
+        </Section>
+
+        {/* ── User Profile ── */}
+        <Section title="User Profile" icon="👤">
+          <p className="text-xs text-muted mb-4">Your name and personal notes are injected into every AI prompt, so the assistant knows who it's talking to and can tailor advice accordingly.</p>
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs text-muted block mb-1">Your Name</label>
+              <input
+                value={form.user_name}
+                onChange={e => set('user_name', e.target.value)}
+                placeholder="e.g. Alex"
+                className="w-full bg-surface-2 border border-border rounded-xl px-3 py-2 text-sm text-text"
+              />
+              <p className="text-xs text-muted mt-1">Shown on the dashboard and used in AI greetings.</p>
+            </div>
+            <div>
+              <label className="text-xs text-muted block mb-1">Personal Memory</label>
+              <textarea
+                value={form.user_memory}
+                onChange={e => set('user_memory', e.target.value)}
+                placeholder={"e.g. I'm saving for a house. I try to keep monthly expenses under €2,000. I have a car loan of €180/month."}
+                rows={4}
+                className="w-full bg-surface-2 border border-border rounded-xl px-3 py-2 text-sm text-text resize-none"
+              />
+              <p className="text-xs text-muted mt-1">The AI uses this context in every response. Write anything relevant — goals, constraints, situation.</p>
+            </div>
+          </div>
         </Section>
 
         {/* ── About ── */}

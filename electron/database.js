@@ -68,6 +68,25 @@ class FinanceDB {
         key   TEXT PRIMARY KEY,
         value TEXT
       );
+
+      CREATE TABLE IF NOT EXISTS chats (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        title      TEXT NOT NULL DEFAULT 'New Chat',
+        span_label TEXT NOT NULL DEFAULT '1 Month',
+        span_days  INTEGER NOT NULL DEFAULT 30,
+        created_at TEXT DEFAULT (datetime('now')),
+        updated_at TEXT DEFAULT (datetime('now'))
+      );
+
+      CREATE TABLE IF NOT EXISTS chat_messages (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        chat_id    INTEGER NOT NULL REFERENCES chats(id) ON DELETE CASCADE,
+        role       TEXT NOT NULL CHECK(role IN ('user','assistant')),
+        content    TEXT NOT NULL,
+        created_at TEXT DEFAULT (datetime('now'))
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_chat_messages_chat ON chat_messages(chat_id);
     `)
 
     // Seed default categories if empty
@@ -94,7 +113,9 @@ class FinanceDB {
       ['accent_custom', '#3dd68c'],
       ['account_balance', ''],
       ['account_balance_date', ''],
-      ['account_balance_label', '']
+      ['account_balance_label', ''],
+      ['user_name', ''],
+      ['user_memory', '']
     ]
     const upsert = this.db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?,?)')
     for (const [k, v] of defaults) upsert.run(k, v)
@@ -142,6 +163,15 @@ class FinanceDB {
   deleteTransaction(id) {
     this.db.prepare('DELETE FROM transactions WHERE id = ?').run(id)
     return { success: true }
+  }
+
+  bulkDeleteTransactions(ids) {
+    const del = this.db.transaction((idList) => {
+      const stmt = this.db.prepare('DELETE FROM transactions WHERE id = ?')
+      for (const id of idList) stmt.run(id)
+    })
+    del(ids)
+    return { deleted: ids.length }
   }
 
   bulkAddTransactions(txs) {
@@ -275,6 +305,86 @@ class FinanceDB {
       WHERE ${where}
       GROUP BY category, type
       ORDER BY total DESC
+    `).all(...params)
+  }
+
+  // ── Chats ───────────────────────────────────────────────────────────────────
+  getChats() {
+    return this.db.prepare(
+      'SELECT * FROM chats ORDER BY updated_at DESC'
+    ).all()
+  }
+
+  createChat(title, spanLabel, spanDays) {
+    const r = this.db.prepare(
+      'INSERT INTO chats (title, span_label, span_days) VALUES (?,?,?)'
+    ).run(title, spanLabel, spanDays)
+    return this.db.prepare('SELECT * FROM chats WHERE id = ?').get(r.lastInsertRowid)
+  }
+
+  updateChatTitle(id, title) {
+    this.db.prepare("UPDATE chats SET title=?, updated_at=datetime('now') WHERE id=?").run(title, id)
+    return { success: true }
+  }
+
+  deleteChat(id) {
+    this.db.prepare('DELETE FROM chats WHERE id = ?').run(id)
+    return { success: true }
+  }
+
+  getChatMessages(chatId) {
+    return this.db.prepare(
+      'SELECT * FROM chat_messages WHERE chat_id = ? ORDER BY id ASC'
+    ).all(chatId)
+  }
+
+  addChatMessage(chatId, role, content) {
+    const r = this.db.prepare(
+      'INSERT INTO chat_messages (chat_id, role, content) VALUES (?,?,?)'
+    ).run(chatId, role, content)
+    // Bump chat updated_at
+    this.db.prepare("UPDATE chats SET updated_at=datetime('now') WHERE id=?").run(chatId)
+    return r.lastInsertRowid
+  }
+
+  // ── Merchants ───────────────────────────────────────────────────────────────
+  getMerchants(filters = {}) {
+    let where = '1=1'
+    const params = []
+    if (filters.dateFrom) { where += ' AND date >= ?'; params.push(filters.dateFrom) }
+    if (filters.dateTo)   { where += ' AND date <= ?'; params.push(filters.dateTo) }
+    if (filters.type)     { where += ' AND type = ?'; params.push(filters.type) }
+
+    // Group by normalized description (trim, lowercase for grouping but show original)
+    return this.db.prepare(`
+      SELECT
+        description,
+        type,
+        category,
+        COUNT(*) as count,
+        SUM(ABS(amount)) as total,
+        AVG(ABS(amount)) as avg,
+        MIN(ABS(amount)) as min_amount,
+        MAX(ABS(amount)) as max_amount,
+        MIN(date) as first_date,
+        MAX(date) as last_date
+      FROM transactions
+      WHERE ${where}
+      GROUP BY LOWER(TRIM(description)), type
+      ORDER BY total DESC
+    `).all(...params)
+  }
+
+  getMerchantHistory(description, filters = {}) {
+    let where = 'LOWER(TRIM(description)) = LOWER(TRIM(?))'
+    const params = [description]
+    if (filters.dateFrom) { where += ' AND date >= ?'; params.push(filters.dateFrom) }
+    if (filters.dateTo)   { where += ' AND date <= ?'; params.push(filters.dateTo) }
+
+    return this.db.prepare(`
+      SELECT * FROM transactions
+      WHERE ${where}
+      ORDER BY date DESC
     `).all(...params)
   }
 
