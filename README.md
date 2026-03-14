@@ -4,10 +4,9 @@
 ### The Privacy-First Open-Source Financial Planner
 
 *No cloud. No accounts. No telemetry. Everything runs on your machine.*
-
+*Built with **Electron**, **React**, **SQLite**, and **Ollama**.*
 </div>
 
-Built with **Electron**, **React**, **SQLite**, and **Ollama** — everything runs on your machine.
 
 ---
 
