@@ -1,6 +1,11 @@
-# ⚓ OpenAnchor | The Privacy-First Open-Source Financial Planner
+<div align="center">
 
-> Open-source, privacy-first financial planner with local AI. No cloud. No accounts. No telemetry.
+# ⚓ OpenAnchor
+### The Privacy-First Open-Source Financial Planner
+
+*No cloud. No accounts. No telemetry. Everything runs on your machine.*
+
+</div>
 
 Built with **Electron**, **React**, **SQLite**, and **Ollama** — everything runs on your machine.
 
