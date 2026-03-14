@@ -1,8 +1,24 @@
-# 💰 Finance Planner
+# ⚓ OpenAnchor | The Open Source Financial Planner
 
 > Open-source, privacy-first financial planner with local AI. No cloud. No accounts. No telemetry.
 
 Built with **Electron**, **React**, **SQLite**, and **Ollama** — everything runs on your machine.
+
+---
+
+## Screenshots
+
+### Dashboard
+![Dashboard](assets/dashboard.png)
+Get a full financial overview at a glance. The dashboard shows your income, expenses, and net balance across any time range — 7 days to 5 years. Interactive area charts track your cash flow over time, while the category breakdown and donut chart reveal exactly where your money is going.
+
+### Transactions
+![Transactions](assets/transactions.png)
+Every transaction in one place. Filter by time range, category, or type — search across all entries instantly. Add, edit, or delete transactions manually, or let the AI importer handle it. Each row shows the date, description, category icon, and amount at a glance.
+
+### AI Assistant
+![AI Assistant](assets/aiassistant.png)
+Your personal finance analyst — running entirely on your machine. Powered by Ollama, the AI assistant reads your transaction history and answers questions, spots spending patterns, and gives tailored recommendations. No data ever leaves your device.
 
 ---
 
@@ -17,21 +33,6 @@ Built with **Electron**, **React**, **SQLite**, and **Ollama** — everything ru
 - ✏️ **Manual management** — Add, edit, delete transactions
 - 🧠 **AI Assistant** — Chat with your financial data, get insights and recommendations
 - 🔒 **100% local** — SQLite database, Ollama AI, no internet required after setup
-
----
-
-## Screenshots
-
-```
-┌─────────────────────────────────────────────────────────┐
-│  📊 Dashboard  │  Time ranges: 7D 2W 1M 3M 6M 1Y 5Y    │
-│                │  ┌──────────┐ ┌──────────┐             │
-│  ↑ Income      │  │ Income   │ │ Expenses │             │
-│  ↓ Expenses    │  │ €3,200   │ │ €2,100   │             │
-│  = Net         │  └──────────┘ └──────────┘             │
-│                │  [Area Chart: Cash Flow]                │
-└─────────────────────────────────────────────────────────┘
-```
 
 ---
 
@@ -76,10 +77,10 @@ ollama pull mistral:7b        # 7b - good all-rounder
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/finance-planner.git
-cd finance-planner
+git clone https://github.com/your-username/openanchor.git
+cd openanchor
 
-# Install dependencies
+# Install dependencies (also rebuilds better-sqlite3 for Electron automatically)
 npm install
 
 # Start in development mode
@@ -91,13 +92,10 @@ npm run dev
 ## Building for Distribution
 
 ```bash
-# Build for your current platform
-npm run build
-
-# Build specifically for macOS
+# Build for macOS (.dmg)
 npm run build:mac
 
-# Build specifically for Windows
+# Build for Windows (.exe)
 npm run build:win
 ```
 
@@ -142,38 +140,11 @@ Output will be in the `dist-electron/` folder.
 
 All data is stored in a local SQLite database:
 
-- **macOS:** `~/Library/Application Support/finance-planner/finance.db`
-- **Windows:** `%APPDATA%\finance-planner\finance.db`
-- **Linux:** `~/.config/finance-planner/finance.db`
+- **macOS:** `~/Library/Application Support/openanchor/finance.db`
+- **Windows:** `%APPDATA%\openanchor\finance.db`
+- **Linux:** `~/.config/openanchor/finance.db`
 
 You can back up this file at any time by copying it.
-
-### Database Schema
-
-```sql
--- Transactions
-CREATE TABLE transactions (
-  id          INTEGER PRIMARY KEY,
-  date        TEXT,      -- YYYY-MM-DD
-  description TEXT,
-  amount      REAL,      -- positive=income, negative=expense
-  category    TEXT,
-  type        TEXT,      -- 'income' | 'expense'
-  source      TEXT,      -- 'manual' | 'upload'
-  notes       TEXT,
-  created_at  TEXT
-);
-
--- Categories (20 defaults + custom)
-CREATE TABLE categories (
-  id         INTEGER PRIMARY KEY,
-  name       TEXT UNIQUE,
-  type       TEXT,       -- 'income' | 'expense' | 'both'
-  color      TEXT,
-  icon       TEXT,
-  is_default INTEGER
-);
-```
 
 ---
 
@@ -216,4 +187,4 @@ Pull requests welcome! Key areas for contribution:
 
 ## License
 
-MIT License — free to use, modify, and distribute.
+MIT License — see [LICENSE](LICENSE) for details.
