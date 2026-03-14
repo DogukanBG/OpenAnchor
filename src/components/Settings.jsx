@@ -14,6 +14,16 @@ const CAT_COLORS = [
   '#06b6d4','#14b8a6','#f59e0b','#ef4444','#84cc16','#a855f7','#64748b'
 ]
 
+const ACCENT_PRESETS = [
+  { id: 'green',  label: 'Emerald',  color: '#3dd68c' },
+  { id: 'blue',   label: 'Blue',     color: '#3b82f6' },
+  { id: 'purple', label: 'Purple',   color: '#a855f7' },
+  { id: 'orange', label: 'Orange',   color: '#f97316' },
+  { id: 'red',    label: 'Red',      color: '#ef4444' },
+  { id: 'cyan',   label: 'Cyan',     color: '#06b6d4' },
+  { id: 'pink',   label: 'Pink',     color: '#ec4899' },
+]
+
 export default function Settings() {
   const { categories, settings, ollamaOk, refreshCategories, refreshSettings } = useApp()
   const [models, setModels] = useState([])
@@ -26,7 +36,10 @@ export default function Settings() {
     extraction_model: '',
     assistant_model: '',
     currency: 'EUR',
-    ollama_url: 'http://127.0.0.1:11434'
+    ollama_url: 'http://127.0.0.1:11434',
+    theme: 'dark',
+    accent_color: 'green',
+    accent_custom: '#3dd68c'
   })
 
   useEffect(() => {
@@ -36,7 +49,10 @@ export default function Settings() {
         extraction_model: settings.extraction_model || '',
         assistant_model: settings.assistant_model || '',
         currency: settings.currency || 'EUR',
-        ollama_url: settings.ollama_url || 'http://127.0.0.1:11434'
+        ollama_url: settings.ollama_url || 'http://127.0.0.1:11434',
+        theme: settings.theme || 'dark',
+        accent_color: settings.accent_color || 'green',
+        accent_custom: settings.accent_custom || '#3dd68c'
       }))
     }
   }, [settings])
@@ -52,7 +68,35 @@ export default function Settings() {
     setLoadingModels(false)
   }
 
-  function set(k, v) { setForm(f => ({ ...f, [k]: v })) }
+  function set(k, v) {
+    const updated = { ...form, [k]: v }
+    setForm(updated)
+    // Live preview — apply immediately without saving
+    previewTheme(updated)
+  }
+
+  function previewTheme(f) {
+    const root = document.documentElement
+    root.setAttribute('data-theme', f.theme || 'dark')
+    const accent = f.accent_color || 'green'
+    root.setAttribute('data-accent', accent)
+    if (accent === 'custom' && f.accent_custom) {
+      const hex = f.accent_custom
+      const r = parseInt(hex.slice(1,3),16)
+      const g = parseInt(hex.slice(3,5),16)
+      const b = parseInt(hex.slice(5,7),16)
+      root.style.setProperty('--accent', hex)
+      root.style.setProperty('--accent-glow', `rgba(${r},${g},${b},0.15)`)
+      root.style.setProperty('--accent-dim',  `rgba(${r},${g},${b},0.12)`)
+      const lum = (0.299*r + 0.587*g + 0.114*b) / 255
+      root.style.setProperty('--accent-text', lum > 0.5 ? '#0f172a' : '#ffffff')
+    } else {
+      root.style.removeProperty('--accent')
+      root.style.removeProperty('--accent-glow')
+      root.style.removeProperty('--accent-dim')
+      root.style.removeProperty('--accent-text')
+    }
+  }
 
   async function saveSettings() {
     for (const [k, v] of Object.entries(form)) {
@@ -138,6 +182,98 @@ export default function Settings() {
               onChange={e => set('ollama_url', e.target.value)}
               className="w-full bg-surface-2 border border-border rounded-xl px-3 py-2 text-sm text-text font-mono"
             />
+          </div>
+        </Section>
+
+        {/* ── Appearance ── */}
+        <Section title="Appearance" icon="🎨">
+          {/* Base theme */}
+          <div className="mb-5">
+            <label className="text-xs text-muted block mb-2">Base Theme</label>
+            <div className="flex gap-3">
+              {[
+                { id: 'dark',  label: '🌑 Dark',  bg: '#0d1117', fg: '#e2e8f0' },
+                { id: 'light', label: '☀️ Light', bg: '#f5f7fa', fg: '#1e2736' }
+              ].map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => set('theme', t.id)}
+                  style={{ background: t.bg, color: t.fg, borderColor: form.theme === t.id ? 'var(--accent)' : 'var(--border)' }}
+                  className={`flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all ${form.theme === t.id ? 'ring-1 ring-offset-1 ring-offset-surface-1' : 'opacity-70 hover:opacity-100'}`}
+                  style={{ background: t.bg, color: t.fg, borderColor: form.theme === t.id ? '#3dd68c' : 'var(--border)' }}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Accent colour */}
+          <div>
+            <label className="text-xs text-muted block mb-2">Accent Colour</label>
+            <div className="flex gap-2 flex-wrap mb-3">
+              {ACCENT_PRESETS.map(p => (
+                <button
+                  key={p.id}
+                  onClick={() => set('accent_color', p.id)}
+                  title={p.label}
+                  className="flex flex-col items-center gap-1 group"
+                >
+                  <span
+                    style={{ background: p.color }}
+                    className={`w-8 h-8 rounded-full transition-all group-hover:scale-110 ${
+                      form.accent_color === p.id ? 'ring-2 ring-white ring-offset-2 ring-offset-surface-1 scale-110' : ''
+                    }`}
+                  />
+                  <span className="text-[10px] text-muted">{p.label}</span>
+                </button>
+              ))}
+              {/* Custom */}
+              <button
+                onClick={() => set('accent_color', 'custom')}
+                className="flex flex-col items-center gap-1 group"
+                title="Custom"
+              >
+                <span
+                  style={{
+                    background: form.accent_color === 'custom'
+                      ? form.accent_custom
+                      : 'conic-gradient(red, yellow, lime, aqua, blue, magenta, red)'
+                  }}
+                  className={`w-8 h-8 rounded-full transition-all group-hover:scale-110 ${
+                    form.accent_color === 'custom' ? 'ring-2 ring-white ring-offset-2 ring-offset-surface-1 scale-110' : ''
+                  }`}
+                />
+                <span className="text-[10px] text-muted">Custom</span>
+              </button>
+            </div>
+
+            {/* Custom hex input */}
+            {form.accent_color === 'custom' && (
+              <div className="flex items-center gap-3 p-3 bg-surface-2 rounded-xl border border-border animate-fade-in">
+                <input
+                  type="color"
+                  value={form.accent_custom}
+                  onChange={e => set('accent_custom', e.target.value)}
+                  className="w-10 h-10 rounded-lg cursor-pointer border-0 bg-transparent p-0"
+                />
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={form.accent_custom}
+                    onChange={e => /^#[0-9a-fA-F]{0,6}$/.test(e.target.value) && set('accent_custom', e.target.value)}
+                    className="w-full bg-surface-1 border border-border rounded-lg px-3 py-1.5 text-sm font-mono text-text"
+                    placeholder="#3dd68c"
+                    maxLength={7}
+                  />
+                  <p className="text-xs text-muted mt-1">Enter any hex colour</p>
+                </div>
+                <span
+                  className="w-10 h-10 rounded-lg shrink-0"
+                  style={{ background: form.accent_custom }}
+                />
+              </div>
+            )}
           </div>
         </Section>
 

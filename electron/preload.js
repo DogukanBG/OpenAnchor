@@ -37,6 +37,12 @@ contextBridge.exposeInMainWorld('api', {
     extractText: (path) => ipcRenderer.invoke('file:extractText', path)
   },
 
+  // Balance
+  balance: {
+    get: () => ipcRenderer.invoke('balance:get'),
+    setIfNewer: (amount, date, label) => ipcRenderer.invoke('balance:setIfNewer', amount, date, label)
+  },
+
   // Ollama
   ollama: {
     listModels: () => ipcRenderer.invoke('ollama:listModels'),

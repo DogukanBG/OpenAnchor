@@ -38,7 +38,36 @@ export default function App() {
     setCategories(cats)
     setSettings(setts)
     setCurrency(setts.currency === 'USD' ? '$' : setts.currency === 'GBP' ? '£' : '€')
+    applyTheme(setts)
     checkOllama()
+  }
+
+  function applyTheme(setts) {
+    const root = document.documentElement
+    // Base theme (light/dark)
+    root.setAttribute('data-theme', setts.theme || 'dark')
+    // Accent color
+    const accent = setts.accent_color || 'green'
+    root.setAttribute('data-accent', accent)
+    // Custom accent hex
+    if (accent === 'custom' && setts.accent_custom) {
+      root.style.setProperty('--accent', setts.accent_custom)
+      // Auto-generate dim + glow from hex
+      const hex = setts.accent_custom
+      const r = parseInt(hex.slice(1,3),16)
+      const g = parseInt(hex.slice(3,5),16)
+      const b = parseInt(hex.slice(5,7),16)
+      root.style.setProperty('--accent-glow', `rgba(${r},${g},${b},0.15)`)
+      root.style.setProperty('--accent-dim',  `rgba(${r},${g},${b},0.12)`)
+      // Pick text color based on luminance
+      const lum = (0.299*r + 0.587*g + 0.114*b) / 255
+      root.style.setProperty('--accent-text', lum > 0.5 ? '#0f172a' : '#ffffff')
+    } else {
+      root.style.removeProperty('--accent')
+      root.style.removeProperty('--accent-glow')
+      root.style.removeProperty('--accent-dim')
+      root.style.removeProperty('--accent-text')
+    }
   }
 
   async function checkOllama() {
@@ -55,6 +84,7 @@ export default function App() {
     const setts = await window.api.settings.getAll()
     setSettings(setts)
     setCurrency(setts.currency === 'USD' ? '$' : setts.currency === 'GBP' ? '£' : '€')
+    applyTheme(setts)
   }
 
   const ctx = { categories, settings, ollamaOk, currency, refreshCategories, refreshSettings, setPage }

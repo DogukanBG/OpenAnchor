@@ -88,7 +88,13 @@ class FinanceDB {
       ['assistant_model', ''],
       ['currency', 'EUR'],
       ['date_format', 'DD.MM.YYYY'],
-      ['ollama_url', 'http://127.0.0.1:11434']
+      ['ollama_url', 'http://127.0.0.1:11434'],
+      ['theme', 'dark'],
+      ['accent_color', 'green'],
+      ['accent_custom', '#3dd68c'],
+      ['account_balance', ''],
+      ['account_balance_date', ''],
+      ['account_balance_label', '']
     ]
     const upsert = this.db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?,?)')
     for (const [k, v] of defaults) upsert.run(k, v)
@@ -270,6 +276,27 @@ class FinanceDB {
       GROUP BY category, type
       ORDER BY total DESC
     `).all(...params)
+  }
+
+  // ── Balance ─────────────────────────────────────────────────────────────────
+  getBalance() {
+    return {
+      amount:  this.getSetting('account_balance'),
+      date:    this.getSetting('account_balance_date'),
+      label:   this.getSetting('account_balance_label')
+    }
+  }
+
+  // Only overwrite stored balance if the incoming date is newer
+  setBalanceIfNewer(amount, date, label = '') {
+    const stored = this.getSetting('account_balance_date')
+    if (!stored || date > stored) {
+      this.setSetting('account_balance', String(amount))
+      this.setSetting('account_balance_date', date)
+      this.setSetting('account_balance_label', label)
+      return { updated: true, amount, date }
+    }
+    return { updated: false, stored_date: stored }
   }
 }
 

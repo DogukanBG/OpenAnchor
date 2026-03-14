@@ -94,24 +94,57 @@ ipcMain.handle('file:openDialog', async () => {
 
 ipcMain.handle('file:extractText', async (_, filePath) => {
   const ext = path.extname(filePath).toLowerCase()
-  
+
   if (ext === '.csv' || ext === '.txt') {
-    return fs.readFileSync(filePath, 'utf-8')
+    // Return as single-page array for uniform handling
+    return { pages: [fs.readFileSync(filePath, 'utf-8')], pageCount: 1 }
   }
-  
+
   if (ext === '.pdf') {
     try {
       const pdfParse = require('pdf-parse')
       const buffer = fs.readFileSync(filePath)
-      const data = await pdfParse(buffer)
-      return data.text
+      const pages = []
+
+      // Use render_page callback to capture text per page
+      const options = {
+        pagerender: function(pageData) {
+          return pageData.getTextContent().then(function(textContent) {
+            let text = ''
+            let lastY = null
+            for (const item of textContent.items) {
+              // Add newline when Y position changes significantly (new line)
+              if (lastY !== null && Math.abs(item.transform[5] - lastY) > 2) {
+                text += '\n'
+              }
+              text += item.str
+              lastY = item.transform[5]
+            }
+            pages.push(text)
+            return text
+          })
+        }
+      }
+
+      const data = await pdfParse(buffer, options)
+      // Fallback: if pagerender didn't fire (some PDFs), split full text by form feed
+      if (pages.length === 0) {
+        const byFormFeed = data.text.split('\f').filter(p => p.trim().length > 0)
+        return { pages: byFormFeed.length > 1 ? byFormFeed : [data.text], pageCount: data.numpages }
+      }
+
+      return { pages, pageCount: data.numpages }
     } catch (err) {
       throw new Error(`PDF parse error: ${err.message}`)
     }
   }
-  
+
   throw new Error(`Unsupported file type: ${ext}`)
 })
+
+// ─── IPC: Balance ────────────────────────────────────────────────────────────
+ipcMain.handle('balance:get', () => db.getBalance())
+ipcMain.handle('balance:setIfNewer', (_, balance, date) => db.setBalanceIfNewer(balance, date))
 
 // ─── IPC: Ollama ─────────────────────────────────────────────────────────────
 ipcMain.handle('ollama:listModels', async () => {
