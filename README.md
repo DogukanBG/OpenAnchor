@@ -1,4 +1,4 @@
-# ⚓ OpenAnchor | The Open Source Financial Planner
+# ⚓ OpenAnchor | The Privacy-First Open-Source Financial Planner
 
 > Open-source, privacy-first financial planner with local AI. No cloud. No accounts. No telemetry.
 
