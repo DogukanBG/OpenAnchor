@@ -112,7 +112,7 @@ You can use a smaller model for extraction and a larger one for the assistant â€
 ## Installation
 
 ```bash
-git clone https://github.com/your-username/openanchor.git
+git clone https://github.com/DogukanBG/openanchor.git
 cd openanchor
 
 # Installs all dependencies and automatically rebuilds
