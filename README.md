@@ -3,7 +3,7 @@
 # ⚓ OpenAnchor
 ### The Privacy-First Open-Source Financial Planner
 
-*No cloud. No accounts. No telemetry. Everything runs on your machine.*
+*No cloud. No accounts. No telemetry. Everything runs on your machine.*<br>
 *Built with **Electron**, **React**, **SQLite**, and **Ollama**.*
 </div>
 
