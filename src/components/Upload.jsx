@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useApp } from '../App'
 import { autoCategorize } from '../utils/categorize'
+import { parseGermanBankCSV } from '../utils/parseCSV'
 
 // ── Prompts ───────────────────────────────────────────────────────────────────
 
@@ -95,6 +96,7 @@ export default function Upload() {
   const [progress, setProgress] = useState('')
   const [progressDetail, setProgressDetail] = useState('') // "Page 2 of 4"
   const [useDetectedBalance, setUseDetectedBalance] = useState(true)
+  const [csvMode, setCsvMode] = useState(false)
 
   const model = settings.extraction_model || ''
 
@@ -109,12 +111,45 @@ export default function Upload() {
   async function parseFile(path) {
     setStep('parsing')
     setProgress('Reading file...')
+    const ext = path.split('.').pop().toLowerCase()
     try {
       const result = await window.api.file.extractText(path)
-      setPages(result.pages)
-      setPageCount(result.pageCount || result.pages.length)
-      setStep('extracted')
-      setProgress('')
+
+      if (ext === 'csv') {
+        // Direct parse — no AI needed for structured CSV
+        setCsvMode(true)
+        setProgress('Parsing CSV...')
+        const raw = result.pages[0]
+        const { transactions, closingBalance, closingDate, error } = parseGermanBankCSV(raw)
+        if (error) { setError(error); setStep('idle'); return }
+
+        if (closingBalance) {
+          setDetectedBalance({
+            amount: closingBalance,
+            date: closingDate || new Date().toISOString().split('T')[0],
+            label: `Closing balance from CSV (${closingDate})`
+          })
+        }
+
+        setProgress('Auto-categorizing...')
+        const categorized = await autoCategorize(
+          transactions.map((tx, i) => ({ ...tx, id: i, page: 1 })),
+          categories,
+          model,
+          ollamaOk,
+          (msg) => setProgress(msg)
+        )
+        setExtracted(categorized)
+        setStep('reviewing')
+        setProgress('')
+      } else {
+        // PDF / TXT — existing AI extraction flow
+        setCsvMode(false)
+        setPages(result.pages)
+        setPageCount(result.pageCount || result.pages.length)
+        setStep('extracted')
+        setProgress('')
+      }
     } catch (e) {
       setError(`File error: ${e.message}`)
       setStep('idle')
@@ -261,7 +296,7 @@ export default function Upload() {
   function reset() {
     setStep('idle'); setFilePath(null); setPages([]); setPageCount(0)
     setExtracted([]); setDetectedBalance(null); setError('')
-    setProgress(''); setProgressDetail(''); setUseDetectedBalance(true)
+    setProgress(''); setProgressDetail(''); setUseDetectedBalance(true); setCsvMode(false)
   }
 
   const selectedCount = extracted.filter(r => r.selected).length
@@ -307,7 +342,7 @@ export default function Upload() {
             className="border-2 border-dashed border-border hover:border-accent rounded-2xl p-16 text-center cursor-pointer transition-all group">
             <div className="text-5xl mb-4 group-hover:scale-110 transition-transform">📄</div>
             <p className="text-text font-semibold text-lg">Click to choose a bank statement</p>
-            <p className="text-muted text-sm mt-2">Supports PDF, CSV, and TXT — processed entirely locally</p>
+            <p className="text-muted text-sm mt-2">PDF / TXT — AI extraction per page · CSV — instant direct parse, no AI needed</p>
           </div>
         )}
 

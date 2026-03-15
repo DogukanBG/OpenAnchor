@@ -63,7 +63,9 @@ ipcMain.handle('transactions:add', (_, tx) => db.addTransaction(tx))
 ipcMain.handle('transactions:update', (_, id, tx) => db.updateTransaction(id, tx))
 ipcMain.handle('transactions:delete', (_, id) => db.deleteTransaction(id))
 ipcMain.handle('transactions:bulkAdd',    (_, txs) => db.bulkAddTransactions(txs))
-ipcMain.handle('transactions:bulkDelete', (_, ids) => db.bulkDeleteTransactions(ids))
+ipcMain.handle('transactions:bulkDelete',     (_, ids)           => db.bulkDeleteTransactions(ids))
+ipcMain.handle('transactions:bulkCategorize', (_, ids, category) => db.bulkCategorizeTransactions(ids, category))
+ipcMain.handle('transactions:bulkUpdateCategory', (_, ids, category) => db.bulkUpdateCategory(ids, category))
 
 // ─── IPC: Categories ─────────────────────────────────────────────────────────
 ipcMain.handle('categories:getAll', () => db.getCategories())
@@ -99,8 +101,12 @@ ipcMain.handle('file:openDialog', async () => {
 ipcMain.handle('file:extractText', async (_, filePath) => {
   const ext = path.extname(filePath).toLowerCase()
 
-  if (ext === '.csv' || ext === '.txt') {
-    // Return as single-page array for uniform handling
+  if (ext === '.txt') {
+    return { pages: [fs.readFileSync(filePath, 'utf-8')], pageCount: 1, type: 'text' }
+  }
+
+  if (ext === '.csv') {
+    // Return raw text — parsing is done in the frontend
     return { pages: [fs.readFileSync(filePath, 'utf-8')], pageCount: 1 }
   }
 
@@ -160,7 +166,8 @@ ipcMain.handle('chats:addMessage',  (_, chatId, role, msg) => db.addChatMessage(
 
 // ─── IPC: Balance ────────────────────────────────────────────────────────────
 ipcMain.handle('balance:get', () => db.getBalance())
-ipcMain.handle('balance:setIfNewer', (_, balance, date) => db.setBalanceIfNewer(balance, date))
+ipcMain.handle('balance:set', (_, amount, date, label) => db.setBalance(amount, date, label))
+ipcMain.handle('balance:setIfNewer', (_, balance, date, label) => db.setBalanceIfNewer(balance, date, label))
 
 // ─── IPC: Ollama ─────────────────────────────────────────────────────────────
 ipcMain.handle('ollama:listModels', async () => {

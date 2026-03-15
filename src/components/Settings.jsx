@@ -32,6 +32,12 @@ export default function Settings() {
   const [newCat, setNewCat] = useState({ name: '', type: 'expense', color: '#6366f1', icon: '📋' })
   const [addingCat, setAddingCat] = useState(false)
 
+  // Manual balance
+  const [manualBalance, setManualBalance]       = useState('')
+  const [manualBalanceDate, setManualBalanceDate] = useState(new Date().toISOString().split('T')[0])
+  const [currentBalance, setCurrentBalance]     = useState(null)
+  const [balanceSaved, setBalanceSaved]         = useState('')
+
   const [form, setForm] = useState({
     extraction_model: '',
     assistant_model: '',
@@ -64,6 +70,12 @@ export default function Settings() {
   useEffect(() => {
     if (ollamaOk) fetchModels()
   }, [ollamaOk])
+
+  useEffect(() => {
+    window.api.balance.get().then(bal => {
+      if (bal?.amount) setCurrentBalance(bal)
+    })
+  }, [])
 
   async function fetchModels() {
     setLoadingModels(true)
@@ -109,6 +121,22 @@ export default function Settings() {
     await refreshSettings()
     setSaved('Saved!')
     setTimeout(() => setSaved(''), 2000)
+  }
+
+  async function saveManualBalance() {
+    if (!manualBalance) return
+    const amount = parseFloat(manualBalance.replace(',', '.'))
+    if (isNaN(amount)) return
+    await window.api.balance.set(amount, manualBalanceDate, 'Manual entry')
+    setCurrentBalance({ amount: String(amount), date: manualBalanceDate, label: 'Manual entry' })
+    setBalanceSaved('Saved!')
+    setTimeout(() => setBalanceSaved(''), 2000)
+  }
+
+  async function clearBalance() {
+    if (!confirm('Clear the stored account balance?')) return
+    await window.api.balance.set('', '', '')
+    setCurrentBalance(null)
   }
 
   async function addCategory() {
@@ -202,9 +230,8 @@ export default function Settings() {
                 <button
                   key={t.id}
                   onClick={() => set('theme', t.id)}
-                  style={{ background: t.bg, color: t.fg, borderColor: form.theme === t.id ? 'var(--accent)' : 'var(--border)' }}
                   className={`flex-1 py-3 rounded-xl border-2 text-sm font-medium transition-all ${form.theme === t.id ? 'ring-1 ring-offset-1 ring-offset-surface-1' : 'opacity-70 hover:opacity-100'}`}
-                  style={{ background: t.bg, color: t.fg, borderColor: form.theme === t.id ? '#3dd68c' : 'var(--border)' }}
+                  style={{ background: t.bg, color: t.fg, borderColor: form.theme === t.id ? 'var(--accent)' : 'var(--border)' }}
                 >
                   {t.label}
                 </button>
@@ -402,6 +429,60 @@ export default function Settings() {
               ))}
             </div>
           </details>
+        </Section>
+
+        {/* ── Account Balance ── */}
+        <Section title="Account Balance" icon="🏦">
+          <p className="text-xs text-muted mb-4">
+            Set your current account balance manually. This is useful when you don't have a bank statement to import yet, or want to correct the balance.
+          </p>
+
+          {/* Current stored balance */}
+          {currentBalance?.amount && (
+            <div className="flex items-center justify-between bg-surface-2 rounded-xl px-4 py-3 mb-4 border border-border">
+              <div>
+                <p className="text-xs text-muted">Current stored balance</p>
+                <p className="text-lg font-display font-bold text-accent">
+                  {parseFloat(currentBalance.amount).toLocaleString('de-DE', { minimumFractionDigits: 2 })}
+                </p>
+                <p className="text-xs text-muted mt-0.5">as of {currentBalance.date} · {currentBalance.label}</p>
+              </div>
+              <button onClick={clearBalance}
+                className="text-xs text-muted hover:text-loss border border-border hover:border-loss px-3 py-1.5 rounded-xl transition-all">
+                Clear
+              </button>
+            </div>
+          )}
+
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="text-xs text-muted block mb-1">Balance Amount</label>
+              <input
+                type="text"
+                value={manualBalance}
+                onChange={e => setManualBalance(e.target.value)}
+                placeholder="e.g. 3420.50"
+                className="w-full bg-surface-2 border border-border rounded-xl px-3 py-2 text-sm text-text font-mono"
+              />
+            </div>
+            <div>
+              <label className="text-xs text-muted block mb-1">As of Date</label>
+              <input
+                type="date"
+                value={manualBalanceDate}
+                onChange={e => setManualBalanceDate(e.target.value)}
+                className="w-full bg-surface-2 border border-border rounded-xl px-3 py-2 text-sm text-text"
+              />
+            </div>
+          </div>
+          <button
+            onClick={saveManualBalance}
+            disabled={!manualBalance}
+            className="mt-3 w-full py-2.5 bg-accent text-surface rounded-xl font-semibold text-sm hover:bg-opacity-90 transition-all disabled:opacity-40"
+          >
+            {balanceSaved || 'Set Balance'}
+          </button>
+          <p className="text-xs text-muted mt-2">This always overwrites the stored balance regardless of date. For automatic date-aware updates, import a bank statement.</p>
         </Section>
 
         {/* ── User Profile ── */}

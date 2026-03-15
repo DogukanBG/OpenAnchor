@@ -134,6 +134,9 @@ class FinanceDB {
       sql += ' AND (description LIKE ? OR notes LIKE ?)'
       params.push(`%${filters.search}%`, `%${filters.search}%`)
     }
+    if (filters.uncategorized) {
+      sql += " AND (category IS NULL OR category = '')"
+    }
 
     sql += ' ORDER BY date DESC, id DESC'
     if (filters.limit) { sql += ' LIMIT ?'; params.push(filters.limit) }
@@ -165,6 +168,15 @@ class FinanceDB {
     return { success: true }
   }
 
+  bulkCategorizeTransactions(ids, category) {
+    const stmt = this.db.prepare('UPDATE transactions SET category = ? WHERE id = ?')
+    const run = this.db.transaction((idList) => {
+      for (const id of idList) stmt.run(category, id)
+    })
+    run(ids)
+    return { updated: ids.length, category }
+  }
+
   bulkDeleteTransactions(ids) {
     const del = this.db.transaction((idList) => {
       const stmt = this.db.prepare('DELETE FROM transactions WHERE id = ?')
@@ -172,6 +184,15 @@ class FinanceDB {
     })
     del(ids)
     return { deleted: ids.length }
+  }
+
+  bulkUpdateCategory(ids, category) {
+    const upd = this.db.transaction((idList) => {
+      const stmt = this.db.prepare('UPDATE transactions SET category = ? WHERE id = ?')
+      for (const id of idList) stmt.run(category, id)
+    })
+    upd(ids)
+    return { updated: ids.length }
   }
 
   bulkAddTransactions(txs) {
@@ -395,6 +416,14 @@ class FinanceDB {
       date:    this.getSetting('account_balance_date'),
       label:   this.getSetting('account_balance_label')
     }
+  }
+
+  // Force-set balance regardless of date (manual entry)
+  setBalance(amount, date, label = 'Manual entry') {
+    this.setSetting('account_balance', String(amount))
+    this.setSetting('account_balance_date', date)
+    this.setSetting('account_balance_label', label)
+    return { updated: true, amount, date }
   }
 
   // Only overwrite stored balance if the incoming date is newer

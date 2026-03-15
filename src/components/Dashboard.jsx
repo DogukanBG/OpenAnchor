@@ -25,7 +25,7 @@ function getDateRange(days) {
 }
 
 // ── Health Report prompt ──────────────────────────────────────────────────────
-function buildHealthReportPrompt(last30, last12) {
+function buildHealthReportPrompt(last30, last12, userName = '', userMemory = '') {
   const fmt = n => Math.abs(n).toFixed(2)
 
   const monthlyAvgExpenses = last12.expenses / 12
@@ -48,7 +48,12 @@ function buildHealthReportPrompt(last30, last12) {
     return { ...b30, avg, change }
   }).filter(b => b.change !== null && b.change > 20)
 
-  return `You are a personal finance analyst. Write a SHORT financial health report (max 5 sentences, no headers, no bullet points, plain prose). Be direct and specific — use the actual numbers.
+  const userBlock = (userName || userMemory)
+    ? `\nUSER CONTEXT:\n${userName ? `Name: ${userName}\n` : ''}${userMemory ? `Notes: ${userMemory}` : ''}\n`
+    : ''
+
+  return `You are a personal finance analyst.${userName ? ` The user's name is ${userName}.` : ''} Write a SHORT financial health report (max 5 sentences, no headers, no bullet points, plain prose). Be direct and specific — use the actual numbers. If the user has provided personal context, factor it into your analysis.
+${userBlock}
 
 DATA:
 Last 30 days: Income €${fmt(last30.income)}, Expenses €${fmt(last30.expenses)}, Net €${fmt(last30.net)}, Savings rate ${savingsRate30}%
@@ -150,7 +155,9 @@ export default function Dashboard() {
 
       const prompt = buildHealthReportPrompt(
         { ...sum30, breakdown: bd30 },
-        { ...sum12, breakdown: bd12 }
+        { ...sum12, breakdown: bd12 },
+        settings.user_name   || '',
+        settings.user_memory || ''
       )
 
       const response = await window.api.ollama.generate({ model, prompt })

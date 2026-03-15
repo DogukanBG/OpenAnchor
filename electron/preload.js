@@ -8,7 +8,9 @@ contextBridge.exposeInMainWorld('api', {
     update: (id, tx) => ipcRenderer.invoke('transactions:update', id, tx),
     delete: (id) => ipcRenderer.invoke('transactions:delete', id),
     bulkAdd:    (txs) => ipcRenderer.invoke('transactions:bulkAdd', txs),
-    bulkDelete: (ids) => ipcRenderer.invoke('transactions:bulkDelete', ids)
+    bulkDelete:         (ids)              => ipcRenderer.invoke('transactions:bulkDelete', ids),
+    bulkCategorize:     (ids, category)    => ipcRenderer.invoke('transactions:bulkCategorize', ids, category),
+    bulkUpdateCategory: (ids, category) => ipcRenderer.invoke('transactions:bulkUpdateCategory', ids, category)
   },
 
   // Categories
@@ -57,6 +59,7 @@ contextBridge.exposeInMainWorld('api', {
   // Balance
   balance: {
     get: () => ipcRenderer.invoke('balance:get'),
+    set: (amount, date, label) => ipcRenderer.invoke('balance:set', amount, date, label),
     setIfNewer: (amount, date, label) => ipcRenderer.invoke('balance:setIfNewer', amount, date, label)
   },
 

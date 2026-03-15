@@ -4,7 +4,6 @@
  * 2. Batch LLM fallback        — one single call for anything unmatched
  */
 
-
 const KEYWORD_MAP = {
   'Housing & Rent': [
     'miete', 'rent', 'wohnungsgeld', 'hausgeld', 'nebenkosten', 'wohnung',
@@ -150,11 +149,13 @@ ${items}`
   } catch { return {} }
 }
 
+const BATCH_SIZE = 16
+
 export async function autoCategorize(transactions, categories, model, ollamaOk, onProgress) {
   const result = transactions.map(tx => ({ ...tx }))
   const needsLLM = []
 
-  // Pass 1: keyword matching
+  // Pass 1: keyword matching — instant, no AI
   for (let i = 0; i < result.length; i++) {
     const cat = matchKeyword(result[i].description, result[i].type)
     if (cat) result[i].category = cat
@@ -162,14 +163,27 @@ export async function autoCategorize(transactions, categories, model, ollamaOk, 
   }
 
   const hits = result.length - needsLLM.length
-  onProgress?.(`Keywords matched ${hits}/${result.length}${needsLLM.length > 0 && model && ollamaOk ? ` · AI categorizing ${needsLLM.length} more...` : ''}`)
+  const batches = Math.ceil(needsLLM.length / BATCH_SIZE)
 
-  // Pass 2: single batch LLM call for the rest
-  if (needsLLM.length > 0 && model && ollamaOk) {
-    const llmResults = await batchCategorize(needsLLM, categories, model)
-    for (let j = 0; j < needsLLM.length; j++) {
-      const cat = llmResults[String(j)]
-      if (cat) result[needsLLM[j].index].category = cat
+  if (needsLLM.length === 0) {
+    onProgress?.(`All ${hits} transactions matched by keywords`)
+    return result
+  }
+
+  onProgress?.(`Keywords matched ${hits}/${result.length} · ${needsLLM.length} sent to AI in ${batches} batch${batches !== 1 ? 'es' : ''} of ${BATCH_SIZE}`)
+
+  // Pass 2: chunked LLM batches of 16
+  if (model && ollamaOk) {
+    for (let b = 0; b < batches; b++) {
+      const chunk = needsLLM.slice(b * BATCH_SIZE, (b + 1) * BATCH_SIZE)
+      onProgress?.(`AI categorizing batch ${b + 1}/${batches} (${chunk.length} transactions)...`)
+
+      const llmResults = await batchCategorize(chunk, categories, model)
+
+      for (let j = 0; j < chunk.length; j++) {
+        const cat = llmResults[String(j)]
+        if (cat) result[chunk[j].index].category = cat
+      }
     }
   }
 
