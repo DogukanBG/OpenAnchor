@@ -1,0 +1,41 @@
+[
+  {
+    "context_days": 180,
+    "cutoff_index": 180,
+    "horizon": 30,
+    "fixture": "synthetic periodic residual flows",
+    "model": "amazon/chronos-2",
+    "inflow_mae_minor": 9.904463704427084,
+    "inflow_interval_coverage": 0.6666666666666666,
+    "outflow_mae_minor": 10.318423461914062,
+    "outflow_interval_coverage": 0.7333333333333333,
+    "cumulative_cashflow_mae_minor": 98.79119008382162,
+    "final_balance_error_minor": 158.79913330078125
+  },
+  {
+    "context_days": 180,
+    "cutoff_index": 240,
+    "horizon": 90,
+    "fixture": "synthetic periodic residual flows",
+    "model": "amazon/chronos-2",
+    "inflow_mae_minor": 11.699686008029515,
+    "inflow_interval_coverage": 0.6,
+    "outflow_mae_minor": 10.787982855902778,
+    "outflow_interval_coverage": 0.6444444444444445,
+    "cumulative_cashflow_mae_minor": 171.1606189303928,
+    "final_balance_error_minor": 406.9194641113281
+  },
+  {
+    "context_days": 180,
+    "cutoff_index": 270,
+    "horizon": 180,
+    "fixture": "synthetic periodic residual flows",
+    "model": "amazon/chronos-2",
+    "inflow_mae_minor": 10.923410203721788,
+    "inflow_interval_coverage": 0.5722222222222222,
+    "outflow_mae_minor": 13.63737284342448,
+    "outflow_interval_coverage": 0.6833333333333333,
+    "cumulative_cashflow_mae_minor": 86.72323125203451,
+    "final_balance_error_minor": 132.75131225585938
+  }
+]

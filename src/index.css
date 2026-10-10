@@ -1,96 +1,25 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+@import 'tailwindcss';
+@config '../tailwind.config.js';
 
-/* ── Default theme (Dark / Green) ── */
 :root {
-  --accent:        #3dd68c;
-  --accent-dim:    #1a4a35;
-  --accent-glow:   rgba(61, 214, 140, 0.15);
-  --accent-text:   #0d1117;
-
-  --surface:       #0d1117;
-  --surface-1:     #161b22;
-  --surface-2:     #1c2128;
-  --surface-3:     #262d36;
-
-  --border:        #2a3140;
-  --border-bright: #3d4a5c;
-
-  --text:          #e2e8f0;
-  --text-dim:      #94a3b8;
-  --text-bright:   #f8fafc;
-  --text-muted:    #5c6b7a;
-
-  --loss:          #f97066;
-  --loss-dim:      #4a1a1a;
-  --warn:          #f0b429;
+ --accent:#2875e8;--accent-dim:#e5efff;--accent-glow:rgba(40,117,232,.14);--accent-text:#fff;
+ --surface:#f5f7fa;--surface-1:#fff;--surface-2:#edf1f7;--surface-3:#e4eaf2;
+ --border:#e0e6ef;--border-bright:#b8c6d8;--text:#243145;--text-dim:#506078;--text-bright:#172438;--text-muted:#6a7b92;
+ --loss:#bb3f48;--loss-dim:#fbe9ec;--warn:#94651a;--warn-dim:#fff1d8;
+ --wood-base:#edf1f7;--wood-grain-a:#edf1f7;--wood-grain-b:#edf1f7;--bar-text:#243145;--bar-text-dim:#6a7b92;
 }
-
-/* ── Theme: Light ── */
-[data-theme="light"] {
-  --surface:       #f5f7fa;
-  --surface-1:     #ffffff;
-  --surface-2:     #eef1f6;
-  --surface-3:     #e2e8f0;
-
-  --border:        #d1d9e6;
-  --border-bright: #b0bdd0;
-
-  --text:          #1e2736;
-  --text-dim:      #4a5568;
-  --text-bright:   #0f172a;
-  --text-muted:    #8a96a8;
+[data-theme="dark"] {
+ --accent:#6ba6ff;--accent-dim:#233858;--accent-glow:rgba(107,166,255,.13);--accent-text:#101a2b;
+ --surface:#111722;--surface-1:#1a2331;--surface-2:#202c3e;--surface-3:#29374b;
+ --border:#2c3a50;--border-bright:#455975;--text:#dce6f5;--text-dim:#adbed5;--text-bright:#f0f5fc;--text-muted:#8fa3bf;
+ --loss:#f28895;--loss-dim:#422936;--warn:#edbd71;--warn-dim:#403426;
+ --wood-base:#17202e;--wood-grain-a:#17202e;--wood-grain-b:#17202e;--bar-text:#dce6f5;--bar-text-dim:#8fa3bf;
 }
-
-/* ── Accent overrides by name ── */
-[data-accent="blue"] {
-  --accent:      #3b82f6;
-  --accent-dim:  #1a2a4a;
-  --accent-glow: rgba(59, 130, 246, 0.15);
-  --accent-text: #ffffff;
-}
-[data-accent="purple"] {
-  --accent:      #a855f7;
-  --accent-dim:  #2d1a4a;
-  --accent-glow: rgba(168, 85, 247, 0.15);
-  --accent-text: #ffffff;
-}
-[data-accent="orange"] {
-  --accent:      #f97316;
-  --accent-dim:  #4a2a10;
-  --accent-glow: rgba(249, 115, 22, 0.15);
-  --accent-text: #ffffff;
-}
-[data-accent="red"] {
-  --accent:      #ef4444;
-  --accent-dim:  #4a1a1a;
-  --accent-glow: rgba(239, 68, 68, 0.15);
-  --accent-text: #ffffff;
-}
-[data-accent="cyan"] {
-  --accent:      #06b6d4;
-  --accent-dim:  #0a2a35;
-  --accent-glow: rgba(6, 182, 212, 0.15);
-  --accent-text: #0f172a;
-}
-[data-accent="pink"] {
-  --accent:      #ec4899;
-  --accent-dim:  #4a1a35;
-  --accent-glow: rgba(236, 72, 153, 0.15);
-  --accent-text: #ffffff;
-}
-[data-accent="custom"] {
-  /* --accent is set inline on :root via JS */
-}
-
-* { box-sizing: border-box; }
-
 body {
   margin: 0;
   background: var(--surface);
   color: var(--text);
-  font-family: 'IBM Plex Sans', sans-serif;
+  font-family: 'Karla', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   user-select: none;
   overflow: hidden;
@@ -107,14 +36,26 @@ body {
 .drag-region { -webkit-app-region: drag; }
 .no-drag      { -webkit-app-region: no-drag; }
 
-/* Glow effects using CSS vars */
-.glow-green { box-shadow: 0 0 20px var(--accent-glow); }
-.glow-red   { box-shadow: 0 0 20px rgba(249,112,102,0.15); }
+/* Wood top bar — pale pine. The grain is a whisper, not a texture. */
+.wood-bar {
+  background-color: var(--wood-base);
+  background-image: repeating-linear-gradient(
+    93deg,
+    var(--wood-grain-a) 0px,
+    var(--wood-base) 2px,
+    var(--wood-base) 30px,
+    var(--wood-grain-b) 32px,
+    var(--wood-base) 62px
+  );
+}
+
+/* Soft highlight — replaces the old neon glow effects */
+.glow-green { box-shadow: 0 2px 10px rgba(0,0,0,0.18); }
+.glow-red   { box-shadow: 0 2px 10px rgba(0,0,0,0.18); }
 
 /* Glass card */
 .glass {
-  background: color-mix(in srgb, var(--surface-1) 80%, transparent);
-  backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--surface-1) 90%, transparent);
   border: 1px solid var(--border);
 }
 
@@ -122,7 +63,7 @@ body {
 .recharts-tooltip-wrapper .recharts-default-tooltip {
   background: var(--surface-1) !important;
   border: 1px solid var(--border) !important;
-  border-radius: 8px !important;
+  border-radius: 6px !important;
   color: var(--text) !important;
 }
 
@@ -138,13 +79,59 @@ input:focus, textarea:focus, select:focus {
 
 button, a { transition: all 0.15s ease; }
 
-@keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position:  200% 0; }
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.6; }
+  50%      { opacity: 1; }
 }
 .skeleton {
-  background: linear-gradient(90deg, var(--surface-2) 25%, var(--surface-3) 50%, var(--surface-2) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+  background: var(--surface-2);
+  animation: pulse-soft 1.6s ease-in-out infinite;
   border-radius: 4px;
 }
+
+/* Shared controls for ledger, planning and evidence screens. */
+.card { background:var(--surface-1);border:1px solid var(--border);border-radius:11px;box-shadow:0 1px 3px rgba(20,40,75,.025); }
+.input { color:var(--text);background:var(--surface-1);border:1px solid var(--border);border-radius:10px;padding:8px 10px;min-height:38px; }
+.btn-primary,.btn-secondary { border-radius:10px;padding:9px 14px;font-weight:600;transition:opacity .15s; }
+.btn-primary { color:var(--accent-text);background:var(--accent); }
+.btn-secondary { color:var(--text);background:var(--surface-2);border:1px solid var(--border); }
+button:disabled { opacity:.45;cursor:not-allowed; }
+.page-title { font-family:'Karla',-apple-system,sans-serif;font-size:28px;font-weight:600;color:var(--text-bright); }
+input[type=checkbox] { accent-color:var(--accent);margin-right:7px; }
+
+.oa-app { display:flex;height:100vh;width:100vw;overflow:hidden;background:var(--surface); }
+.oa-sidebar { width:210px;flex-shrink:0;background:var(--surface-2);border-right:1px solid var(--border);display:flex;flex-direction:column;padding:0 15px 20px; }
+.oa-window-handle { height:52px;flex-shrink:0; }
+.oa-brand { display:flex;align-items:center;gap:10px;font-size:18px;font-weight:650;letter-spacing:-.3px;color:var(--text-bright);padding:6px 8px 28px; }
+.oa-brand img { width:36px;height:36px;object-fit:contain; }
+.oa-navigation { display:flex;flex-direction:column;gap:5px; }
+.oa-navigation button { display:flex;align-items:center;gap:12px;text-align:left;padding:11px 12px;border-radius:8px;color:var(--text-dim);font-size:14px;font-weight:500; }
+.oa-navigation button:hover { background:var(--surface-3); }
+.oa-navigation button[aria-current="page"] { color:var(--accent);background:var(--accent-dim);font-weight:650; }
+.oa-sidebar-footer { margin-top:auto;padding:20px 10px 0;color:var(--text-muted);font-size:12px;display:grid;gap:10px; }
+.oa-sidebar-footer>div { display:flex;align-items:center;gap:8px; }
+.oa-status { width:6px;height:6px;border-radius:50%;background:var(--text-muted); }
+.oa-status.connected { background:var(--accent); }
+.oa-workspace { min-width:0;flex:1;display:flex;flex-direction:column; }
+.oa-titlebar { height:30px;flex-shrink:0; }
+.oa-content { overflow:auto;flex:1;min-height:0; }
+.oa-content>div { max-width:1450px;margin:0 auto; }
+.page-title { font-size:27px;letter-spacing:-.6px;font-weight:650; }
+.card h2 { font-size:17px;font-weight:650;color:var(--text-bright);margin-bottom:12px; }
+th { font-size:12px;font-weight:600;color:var(--text-muted);padding:8px 10px;text-align:left; }
+td { padding:11px 10px; }
+input,select,textarea { font-variant-numeric:tabular-nums; }
+.card .text-2xl { font-size:29px;letter-spacing:-.6px;font-variant-numeric:tabular-nums; }
+@media(max-width:1000px) { .oa-sidebar { width:180px; }.oa-content>.p-8 { padding:24px; } }
+
+.oa-budget-track { height:5px;background:var(--surface-3);border-radius:4px;margin-top:9px;overflow:hidden; }
+.oa-budget-track span { display:block;height:100%;background:var(--accent);border-radius:4px; }
+
+.oa-review-group-heading { width:100%;min-width:0;margin-bottom:12px; }
+.oa-review-group-title { display:block;width:100%;min-width:0;text-align:left; }
+.oa-review-group-name { display:block;white-space:pre-wrap;overflow-wrap:anywhere;font-weight:600; }
+.oa-review-group-meta { display:block;margin-top:5px;color:var(--text-muted);font-size:13px; }
+.oa-review-group-actions { display:flex;flex-wrap:wrap;align-items:center;gap:12px;min-width:0; }
+.oa-review-group-actions>* { max-width:100%; }
+.oa-review-group-actions button { white-space:normal; }
+.oa-review-group-actions select { min-width:180px; }

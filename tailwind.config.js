@@ -1,12 +1,23 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       fontFamily: {
-        sans: ['IBM Plex Sans', 'sans-serif'],
-        mono: ['IBM Plex Mono', 'monospace'],
-        display: ['Syne', 'sans-serif']
+        sans: ['Karla', 'sans-serif'],
+        mono: ['ui-monospace', 'monospace'],
+        display: ['Karla', '-apple-system', 'sans-serif']
+      },
+      borderRadius: {
+        lg:  '0.3rem',
+        xl:  '0.4rem',
+        '2xl': '0.55rem',
+        '3xl': '0.75rem'
+      },
+      boxShadow: {
+        lg: '0 4px 10px rgba(0,0,0,0.15)',
+        xl: '0 6px 14px rgba(0,0,0,0.18)',
+        '2xl': '0 10px 20px rgba(0,0,0,0.22)'
       },
       colors: {
         surface: {
@@ -33,6 +44,10 @@ export default {
           dim: 'var(--warn-dim, #4a3a10)'
         },
         muted: 'var(--text-muted)',
+        bar: {
+          text: 'var(--bar-text)',
+          dim: 'var(--bar-text-dim)'
+        },
         text: {
           DEFAULT: 'var(--text)',
           dim: 'var(--text-dim)',

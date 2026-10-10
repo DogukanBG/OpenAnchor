@@ -1,0 +1,5 @@
+{
+ "revision":"chronos-2-29ec3766-runtime-v1",
+ "python":{"url":"https://github.com/astral-sh/python-build-standalone/releases/download/20260901/cpython-3.12.14%2B20260901-aarch64-apple-darwin-install_only_stripped.tar.gz","sha256":"81a359f1cfadd4da11766534c5913791cea55f26e1bb902cacd2a531bb1e4b2b"},
+ "model":{"repository":"amazon/chronos-2","revision":"29ec3766d36d6f73f0696f85560a422f50e8498c","files":[{"name":"config.json","sha256":"ef1143bfdc9c0376d9a056eefca46cb4b1ec3d0ffacd541ff56feb40fb708031"},{"name":"model.safetensors","sha256":"ddcda3c7508bf2528087723e98a20707cc04b7f370ae275a9fd88078ddba4f42"}]}
+}

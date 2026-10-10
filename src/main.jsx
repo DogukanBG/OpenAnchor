@@ -1,3 +1,5 @@
+import '@fontsource/karla/latin-400.css'
+import '@fontsource/karla/latin-600.css'
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'

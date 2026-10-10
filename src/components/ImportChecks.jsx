@@ -1,0 +1,7 @@
+import React,{useEffect,useState} from 'react'
+import {Panel,ErrorNotice} from './Workspace'
+export default function ImportChecks({input,excluded,onReady}){
+ const [result,setResult]=useState(null),[error,setError]=useState(''),[checking,setChecking]=useState(true),key=JSON.stringify(input)
+ useEffect(()=>{let live=true;setChecking(true);setResult(null);setError('');onReady(false);const timer=setTimeout(()=>window.api.imports.checks(JSON.parse(key)).then(value=>{if(live){setResult(value);onReady(value.ready)}}).catch(e=>live&&setError(e.message)).finally(()=>live&&setChecking(false)),150);return()=>{live=false;clearTimeout(timer)}},[key,onReady])
+ return <Panel><h2>Import checks</h2><p className="text-sm text-muted my-2">Checks refresh when you edit the selected records, coverage or balance.</p><ErrorNotice error={error}/>{checking?<p>Checking selected records…</p>:result&&<><p className="font-medium">{result.ready?'Selected records pass the required checks.':'Resolve the items below before importing.'}</p><p className="text-sm text-muted mt-2">{result.selected} selected · {excluded} excluded</p>{result.checks.map(c=><p className={`mt-2 text-sm ${c.blocking?'text-loss':'text-muted'}`} key={c.id}>{c.blocking?'Needs correction: ':'Note: '}{c.label}</p>)}{result.gaps.map((g,i)=><p className="text-xs text-muted" key={i}>Missing period: {g.dateFrom} – {g.dateTo}</p>)}{result.reconciliation.available&&<p className="text-sm mt-3">Balance reconciliation: {result.reconciliation.reconciled?'matches':'does not match'}</p>}</>}</Panel>
+}

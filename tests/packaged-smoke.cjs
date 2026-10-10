@@ -1,0 +1,6 @@
+const fs=require('fs'),path=require('path'),{spawn}=require('child_process')
+const root=path.resolve(__dirname,'..'),profile=fs.mkdtempSync('/private/tmp/openanchor-packaged-'),runtime=path.join(profile,'chronos-2')
+fs.mkdirSync(runtime);fs.symlinkSync(path.join(root,'.forecast-test/model'),path.join(runtime,'model'),'dir')
+const standalone=process.argv.includes('--standalone');if(standalone&&fs.existsSync(path.join(root,'.forecast-test/python.tar.gz')))fs.copyFileSync(path.join(root,'.forecast-test/python.tar.gz'),path.join(runtime,'python.tar.gz'))
+const child=spawn(path.join(root,'dist-electron/mac-arm64/OpenAnchor.app/Contents/MacOS/OpenAnchor'),[],{stdio:'inherit',env:{...process.env,OPENANCHOR_TEST_DATA:profile,OPENANCHOR_SMOKE_SCRIPT:path.join(root,'tests/smoke-checks.cjs'),OPENANCHOR_SMOKE_FORECAST:'1',OPENANCHOR_SMOKE_PYTHON:standalone?'':path.join(root,'.venv-forecast/bin/python')}})
+child.on('error',error=>{console.error(error);process.exitCode=1});child.on('exit',code=>{console.log('Synthetic packaged profile:',profile);process.exitCode=code??1})

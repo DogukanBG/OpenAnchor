@@ -1,49 +1,94 @@
 {
-  "name": "finance-planner",
+  "name": "openanchor",
   "version": "1.0.0",
-  "description": "Open-source local financial planner with AI — powered by Ollama",
+  "description": "Open-source local financial planner with AI \u2014 powered by Ollama or llama.cpp",
   "main": "electron/main.js",
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && cross-env NODE_ENV=development electron .\"",
-    "build": "vite build && electron-builder",
-    "build:mac": "vite build && electron-builder --mac",
-    "build:win": "vite build && electron-builder --win",
+    "build": "vite build && electron-builder --publish never",
+    "build:mac": "vite build && electron-builder --mac --publish never",
+    "build:win": "vite build && electron-builder --win --publish never",
     "preview": "vite preview",
-    "postinstall": "electron-rebuild -f -w better-sqlite3"
+    "postinstall": "electron-builder install-app-deps",
+    "test": "ELECTRON_RUN_AS_NODE=1 electron tests/run.cjs",
+    "build:mac:dir": "vite build && electron-builder --mac dir --arm64 --publish never",
+    "icon": "sh scripts/build-icon.sh"
   },
   "dependencies": {
-    "better-sqlite3": "^11.0.0",
+    "@fontsource/karla": "^5.3.0",
+    "better-sqlite3": "^13.0.3",
+    "csv-parse": "^7.0.3",
     "pdf-parse": "^1.1.1",
-    "csv-parse": "^5.5.5",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "recharts": "^2.12.7"
   },
   "devDependencies": {
-    "@electron/rebuild": "^3.6.0",
-    "@vitejs/plugin-react": "^4.2.1",
+    "@electron/rebuild": "^4.2.0",
+    "@tailwindcss/postcss": "^4.3.3",
+    "@vitejs/plugin-react": "^6.1.1",
     "autoprefixer": "^10.4.18",
     "concurrently": "^8.2.2",
     "cross-env": "^7.0.3",
-    "electron": "^29.1.4",
-    "electron-builder": "^24.13.3",
+    "electron": "^44.5.1",
+    "electron-builder": "^26.15.3",
     "postcss": "^8.4.35",
-    "tailwindcss": "^3.4.1",
-    "vite": "^5.1.6",
+    "tailwindcss": "^4.3.3",
+    "vite": "^8.3.2",
     "wait-on": "^7.2.0"
   },
   "build": {
-    "appId": "com.opensource.finance-planner",
-    "productName": "Finance Planner",
-    "directories": { "output": "dist-electron" },
-    "files": ["dist/**/*", "electron/**/*", "node_modules/**/*"],
+    "appId": "com.opensource.openanchor",
+    "productName": "OpenAnchor",
+    "directories": {
+      "output": "dist-electron"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "node_modules/**/*",
+      "assets/icons/OpenAnchor.icns",
+      "assets/icons/openanchor-blue.png"
+    ],
     "mac": {
       "category": "public.app-category.finance",
-      "target": ["dmg", "zip"]
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "assets/icons/OpenAnchor.icns",
+      "notarize": false,
+      "identity": null
     },
     "win": {
-      "target": ["nsis", "zip"]
+      "target": [
+        "nsis",
+        "zip"
+      ]
     },
-    "extraMetadata": { "main": "electron/main.js" }
+    "extraMetadata": {
+      "main": "electron/main.js"
+    },
+    "asarUnpack": [
+      "node_modules/better-sqlite3/**/*",
+      "electron/forecast/**/*"
+    ],
+    "publish": null
+  },
+  "overrides": {
+    "@electron/get": "5.1.0"
+  },
+  "engines": {
+    "node": ">=22.12.0"
   }
 }
